@@ -271,8 +271,6 @@ module.exports = class PetController{
             return
         }
 
-        console.log(pet.adopter)
-
         // check if user has already scheduled a visit
         if(pet.adopter){
             if(pet.adopter._id.equals(user._id)){
@@ -312,7 +310,19 @@ module.exports = class PetController{
             return
         }
 
-        
+        const token = getToken(req)
+        const user = await getUserByToken(token)
+
+        if(pet.user._id.toString() !== user._id.toString() ){
+            res.status(404).json({message: "Houve um problema com sua solicitação, tente novamente mais tarde"})
+            return
+        }
+
+        pet.avaliable = false
+
+        await Pet.findByIdAndUpdate(petId, pet)
+
+        res.status(200).json({message: "Parabéns você adotou um bichinho!"})
 
     }
 }
