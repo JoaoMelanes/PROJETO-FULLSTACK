@@ -136,12 +136,14 @@ module.exports = class PetController{
 
         if(!ObjectId.isValid(petId)){
             res.status(404).json({message: "Id invalido"})
+            return
         }
 
         const pet = await Pet.findById({_id: petId})
 
         if(!pet){
             res.status(404).json({message: "pet não existe"})
+            return
         }
 
         const token = getToken(req)
@@ -149,13 +151,94 @@ module.exports = class PetController{
 
         if(pet.user._id.toString() !== user._id.toString()){
             res.status(422).json({message: "Houve um problema com sua solicitação!!, tente novamente mais tarde"})
+            return
         }
         
         try{
+            await Pet.findByIdAndDelete(petId)
             res.status(200).json({message: `Pet removido id:${petId}`})
         }catch(e){
             res.status(404).json({message: e})
             return
         }
+    }
+
+    static async petEdit(req, res){
+
+        const petId = req.params.id
+
+        if(!ObjectId.isValid(petId)){
+            res.status(404).json({message: "Id invalido"})
+            return
+        }
+
+        const {name, age, weight, color, available} = req.body
+
+        const images = req.files
+
+        const updatedDate = {}
+
+        const pet = await Pet.findOne({_id: petId})
+
+        if(!pet){
+            res.status(422).json({message: "Pet não existe"})
+            return
+        }
+
+        const token = getToken(req)
+        const user = getUserByToken(token)
+
+        if(pet.user._id.toString() !== user._id.toString() ){
+            res.status(404).json({message: "Houve um problema com sua solicitação, tente novamente mais tarde"})
+            return
+        }
+
+        if(!name){
+            res.status(422).json({message: "O nome é obrigatorio"})
+            return
+        } else{
+            updatedDate.name = name
+        }
+
+        if(!age){
+            res.status(422).json({message: "A idade é obrigatorio"})
+            return
+        }else{
+            updatedDate.age = age
+        }
+
+        if(!weight){
+            res.status(422).json({message: "O peso é obrigatorio"})
+            return
+        }else{
+            updatedDate.weight = weight
+        }
+
+        if(!color){
+            res.status(422).json({message: "A cor é obrigatorio"})
+            return
+        }else{
+            updatedDate.color = color
+        }
+
+        
+        if(!available){
+            res.status(422).json({message: "Confirmar doação é obrigatorio"})
+            return
+        }else{
+            updatedDate.available = available
+        }
+
+        if(images.lenght === 0){
+            res.status(422).json({message: "A imagem é obrigatorio"})
+            return
+        }else{
+            updatedDate.images = []
+            images.map((image) => {
+                updatedDate.images.push(images.filename)
+            })
+        }
+
+        
     }
 }
