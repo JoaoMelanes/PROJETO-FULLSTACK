@@ -186,7 +186,7 @@ module.exports = class PetController{
         }
 
         const token = getToken(req)
-        const user = getUserByToken(token)
+        const user = await getUserByToken(token)
 
         if(pet.user._id.toString() !== user._id.toString() ){
             res.status(404).json({message: "Houve um problema com sua solicitação, tente novamente mais tarde"})
@@ -242,6 +242,77 @@ module.exports = class PetController{
         await Pet.findOneAndUpdate(petId, updatedDate)
 
         res.status(200).json({message: "Pet atualizado!"})
+
+    }
+
+    static async petSchedule(req, res){
+        const petId = req.params.id
+
+        // check if id exist
+        if(!ObjectId.isValid(petId)){
+            res.status(404).json({message: "Id invalido"})
+            return
+        }
+
+        // check if pet exist
+        const pet = await Pet.findOne({_id: petId})
+
+        if(!pet){
+            res.status(422).json({message: "Pet não existe"})
+            return
+        }
+
+        // check if pet not is my pet
+        const token = getToken(req)
+        const user = await getUserByToken(token)
+
+        if(pet.user._id.equals(user._id) ){
+            res.status(404).json({message: "Você não pode agendar uma visita com seu próprio pet"})
+            return
+        }
+
+        console.log(pet.adopter)
+
+        // check if user has already scheduled a visit
+        if(pet.adopter){
+            if(pet.adopter._id.equals(user._id)){
+                res.status(404).json({message: "Você já agendou uma visita para este pet"})
+            return
+            }
+        }
+
+        // add user to pet
+        pet.adopter = {
+            _id: user._id,
+            name: user.name,
+            image: user.image
+        }
+
+        await Pet.findByIdAndUpdate(petId, pet)
+
+        res.status(200).json({message: `A visita foi agendada com sucesso, entre em contato com ${pet.user.name}, pelo telefone: ${pet.user.phone}`})
+
+    }
+
+    static async petAdoption(req, res){ 
+
+        const petId = req.params.id
+
+        // check if id exist
+        if(!ObjectId.isValid(petId)){
+            res.status(404).json({message: "Id invalido"})
+            return
+        }
+
+        // check if pet exist
+        const pet = await Pet.findOne({_id: petId})
+
+        if(!pet){
+            res.status(422).json({message: "Pet não existe"})
+            return
+        }
+
+        
 
     }
 }
