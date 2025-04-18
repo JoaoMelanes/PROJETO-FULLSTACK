@@ -239,6 +239,9 @@ module.exports = class PetController{
             })
         }
 
-        
+        await Pet.findOneAndUpdate(petId, updatedDate)
+
+        res.status(200).json({message: "Pet atualizado!"})
+
     }
 }
