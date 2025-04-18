@@ -145,9 +145,9 @@ module.exports = class PetController{
         }
 
         const token = getToken(req)
-        const user = getUserByToken(token)
+        const user = await getUserByToken(token)
 
-        if(pet.user._id.toString() !== user._id){
+        if(pet.user._id.toString() !== user._id.toString()){
             res.status(422).json({message: "Houve um problema com sua solicitação!!, tente novamente mais tarde"})
         }
         
