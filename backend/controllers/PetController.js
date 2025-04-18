@@ -138,7 +138,18 @@ module.exports = class PetController{
             res.status(404).json({message: "Id invalido"})
         }
 
-        const pet = await Pet.deleteOne({_id: petId})
+        const pet = await Pet.findById({_id: petId})
+
+        if(!pet){
+            res.status(404).json({message: "pet não existe"})
+        }
+
+        const token = getToken(req)
+        const user = getUserByToken(token)
+
+        if(pet.user._id.toString() !== user._id){
+            res.status(422).json({message: "Houve um problema com sua solicitação!!, tente novamente mais tarde"})
+        }
         
         try{
             res.status(200).json({message: `Pet removido id:${petId}`})
