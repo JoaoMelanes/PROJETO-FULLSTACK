@@ -1,6 +1,7 @@
 // helpers
 const getToken = require('../helpers/get-token')
 const getUserByToken = require('../helpers/get-user-by-token')
+const ObjectId = require('mongoose').Types.ObjectId
 // model
 const Pet = require('../models/Pet')
 
@@ -74,6 +75,76 @@ module.exports = class PetController{
 
         }catch(e){
             res.status(500).json({message: e})
+        }
+    }
+
+    static async getAll(req, res){
+
+        const pets = await Pet.find().sort('-createdAt')
+
+        res.status(200).json({
+            pets: pets,
+        })
+    }
+
+    static async myPets(req, res){
+
+        const token = getToken(req)
+        const user = await getUserByToken(token)
+
+        const pets = await Pet.find({"user._id": user._id}).sort('-createdAt')
+
+        res.status(200).json({pets})
+    }
+
+    static async myAdoptions(req,res){
+
+        const token = getToken(req)
+        const user = await getUserByToken(token)
+
+        const pets = await Pet.find({"adopter._id": user._id}).sort('-createdAt')
+
+        res.status(200).json({pets})
+    }
+
+    static async petDescripiton(req, res){
+
+        const petId = req.params.id
+
+        if(!ObjectId.isValid(petId)){
+            res.status(422).json({message: 'Id invalido!'})
+            return
+        }
+
+        const pet = await Pet.findOne({_id: petId})
+
+        if(!pet){
+            res.status(404).json({message: "Pet inexistente"})
+        }
+
+        try{
+            res.status(200).json({pet})
+        }catch(e){
+            res.status(404).json({message: e})
+            return
+        }
+    }
+
+    static async petRemove(req, res){
+
+        const petId = req.params.id
+
+        if(!ObjectId.isValid(petId)){
+            res.status(404).json({message: "Id invalido"})
+        }
+
+        const pet = await Pet.deleteOne({_id: petId})
+        
+        try{
+            res.status(200).json({message: `Pet removido id:${petId}`})
+        }catch(e){
+            res.status(404).json({message: e})
+            return
         }
     }
 }
