@@ -10,6 +10,7 @@ import Message from './components/layouts/Message';
 import Login from './components/pages/auth/Login';
 import Register from './components/pages/auth/Register';
 import Home from './components/pages/Home';
+import Profile from './components/pages/user/Profile';
 
 
 // contexts
@@ -23,6 +24,7 @@ function App() {
           <Message />
             <Container>
               <Routes>
+                <Route path='/user/profile' element={<Profile />} />
                 <Route path='/login' element={<Login />} />
                 <Route path='/' element={<Home />} />
                 <Route path='/register' element={<Register />} />

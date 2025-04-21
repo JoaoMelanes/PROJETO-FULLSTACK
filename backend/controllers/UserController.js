@@ -111,22 +111,22 @@ module.exports = class UserController{
     }
 
     static async checkUser(req, res){
-        let currentUSer
+        let currentUser
 
         if(req.headers.authorization){
 
             const token = getToken(req)
             const decoded = jwt.verify(token, 'nossosecret') 
 
-            currentUSer = await User.findById(decoded.id)
+            currentUser = await User.findById(decoded.id)
 
-            currentUSer.password = undefined
+            currentUser.password = undefined
 
         }else{
-            currentUSer = null
+             currentUser = null
         }
 
-        res.status(200).json({message: currentUSer})
+        res.status(200).json({currentUser})
     }
 
     static async getUserById(req, res){
