@@ -9,7 +9,7 @@ app.use(express.json())
 //solve cors
 app.use(cors({
     credentials: true, 
-    origin: 'http://localhost:3000'
+    origin: 'http://localhost:3001'
 }))
 
 //Public folder for img
